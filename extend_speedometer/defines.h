@@ -148,8 +148,10 @@ struct { //D
     unsigned char br; //brake
     char          initialPercent;
     int           initialCapacity;
+    unsigned int  initialPower;
     char          spentPercent;     //percent spented from power On
     int           spentCapacity;
+    unsigned int  spentPower;
     unsigned int  chargedCapacity;
     unsigned int  sph;      //1  km/h
     unsigned int  spl;      //0.01 km/h

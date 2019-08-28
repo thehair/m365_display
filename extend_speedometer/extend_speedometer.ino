@@ -470,6 +470,7 @@ void calculate(){
       //D.voltl = S25C31.voltage % 100;
       D.spentPercent  = abs(D.initialPercent  - D.remPercent);
       D.spentCapacity = abs(D.initialCapacity - D.remCapacity);
+      D.spentPower = abs(D.initialPower - (D.remCapacity / 1000 * D.voltage));
       break;
     case 0xB0: // 8 speed average mileage poweron time
       D.sph = abs(S23CB0.speed) / 1000 * wheelmult;       //speed
@@ -497,6 +498,7 @@ void calculate(){
     if(D.remCapacity != 0 && D.remPercent != 0){
       D.initialPercent = D.remPercent;
       D.initialCapacity = D.remCapacity;
+      D.initialPower = D.remCapacity / 1000 * D.voltage;
       init = 1;
     }
   }
@@ -1355,9 +1357,11 @@ void processPacket(unsigned char * data, unsigned char len){
             if(D.initialPercent == 0){
               D.initialPercent  = S25C31.remainPercent;
               D.initialCapacity = S25C31.remainCapacity;
+              D.initialPower = S25C31.remainCapacity / 1000 * S25C31.voltage;
             }else{
               D.spentPercent  = D.initialPercent  - S25C31.remainPercent; //calculate spent energy
               D.spentCapacity = D.initialCapacity - S25C31.remainCapacity;
+              D.spentPower = D.initialPower - (S25C31.remainCapacity / 1000 * S25C31.voltage);
             }
             //DEBUG_PORT.println("A25C31_OK");
           }
