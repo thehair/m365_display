@@ -1,7 +1,11 @@
+// start user options
+#define mile_Units  //miles units, uncomment do enable
+#define sh1106      //1.3 inch oled with SH1106 driver, uncomment do enable
+// end user options
+
 #include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
 #include <gfxfont.h>
 
 #include <avr/pgmspace.h>
@@ -12,11 +16,26 @@
 #include <./Fonts/FreeSerifBoldItalic18pt7b.h>
 
 MessagesClass Message;
-Adafruit_SSD1306 display(128, 64, &Wire, -1, 400000UL, 100000UL);
+
 
 #define XIAOMI_PORT Serial
 #define RX_DISABLE UCSR0B &= ~_BV(RXEN0);
 #define RX_ENABLE  UCSR0B |=  _BV(RXEN0);
+
+#ifdef sh1106
+  #include <Adafruit_SH1106.h>
+  Adafruit_SH1106 display(-1);
+#else
+  #include <Adafruit_SSD1306.h>
+  Adafruit_SSD1306 display(128, 64, &Wire, -1, 400000UL, 100000UL);
+#endif
+
+// wheel multiplier for Units
+#ifdef mile_Units
+  double wheelmult = 1 / 1.60934;
+#else
+  double wheelmult = 1;
+#endif
 
 const unsigned char TH_KEY_TRES  =  53; //38-190
 const unsigned char BR_KEY_TRES  =  43; //35-169
@@ -102,7 +121,11 @@ const char bp0[] PROGMEM = {"Vlt"};     //for BIG screens
 const char bp1[] PROGMEM = {"Ave"};
 const char bp2[] PROGMEM = {"Amp"};
 const char bp3[] PROGMEM = {"Mil"};
-const char bp4[] PROGMEM = {"Spd"};
+#ifdef mile_Units
+  const char bp4[] PROGMEM = {"Mph"};
+#else
+  const char bp4[] PROGMEM = {"Kph"};
+#endif
 const char bp5[] PROGMEM = {"Tim"};
 
 const char * menuMainItems[]  = {mm1, mm2, mm3, mm4, mm5};
@@ -239,7 +262,7 @@ struct __attribute__((packed))A23C23{ //skip
   unsigned char u2;
   unsigned char u3; //0x30
   unsigned char u4; //0x09
-  unsigned int  remainMileage;  // /100 
+  unsigned int  remainMileage;  // /100
 }S23C23;
 
 struct __attribute__((packed))A23C3A{

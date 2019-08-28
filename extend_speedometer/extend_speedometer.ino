@@ -2,13 +2,18 @@
 
 void setup() {
   XIAOMI_PORT.begin(115200);
-  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3C (for the 128x64)
-
+  
+  #ifdef sh1106
+    display.begin(SH1106_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3C (for the 128x64) 
+  #else
+    display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3C (for the 128x64)
+  #endif
+  
   display.clearDisplay();      //------------------------------
   display.setTextSize(2);      //this segment for debug only
   display.setCursor(1,1);
   display.setTextColor(WHITE);
-  display.println(F("Hello Kate")); //for wife :) just my fun tradition for devices with screens
+  display.println(F("ScootScoot")); 
   display.println();
   display.println(F("- no BUS -"));
 
@@ -467,14 +472,14 @@ void calculate(){
       D.spentCapacity = abs(D.initialCapacity - D.remCapacity);
       break;
     case 0xB0: // 8 speed average mileage poweron time
-      D.sph = abs(S23CB0.speed) / 1000;       //speed
-      D.spl = abs(S23CB0.speed) % 1000 / 10;
-      D.milh = S23CB0.mileageCurrent / 100;   //mileage
-      D.mill = S23CB0.mileageCurrent % 100;
-      D.milTotH = S23CB0.mileageTotal / 1000; //mileage total
-      D.milTotL = S23CB0.mileageTotal % 10;
-      D.aveh = S23CB0.averageSpeed / 1000;
-      D.avel = S23CB0.averageSpeed % 1000;
+      D.sph = abs(S23CB0.speed) / 1000 * wheelmult;       //speed
+      D.spl = abs(S23CB0.speed) % 1000 / 10 * wheelmult;
+      D.milh = S23CB0.mileageCurrent / 100 * wheelmult;   //mileage
+      D.mill = S23CB0.mileageCurrent % 100 * wheelmult;
+      D.milTotH = S23CB0.mileageTotal / 1000 * wheelmult; //mileage total
+      D.milTotL = S23CB0.mileageTotal % 10 * wheelmult;
+      D.aveh = S23CB0.averageSpeed / 1000 * wheelmult;
+      D.avel = S23CB0.averageSpeed % 1000 * wheelmult;
       break;
     case 0x3A: //10
       D.tripMin  = S23C3A.ridingTime  / 60;     //riding time
@@ -625,16 +630,16 @@ void displayRoutine(unsigned char var){
       printBig(S25C31.voltage, dispBp[0]);
       break;
     case BIG_AVERAGE:
-      printBig(S23CB0.averageSpeed / 10, dispBp[1]);
+      printBig(S23CB0.averageSpeed / 10 * wheelmult, dispBp[1]);
       break;
     case BIG_CURRENT:                               //-- BIG CURRENT
       printBig(S25C31.current, dispBp[2]);
       break;
     case BIG_MILEAGE:                              //-- BIG MILEAGE
-      printBig(S23CB0.mileageCurrent, dispBp[3]);
+      printBig(S23CB0.mileageCurrent * wheelmult, dispBp[3]);
       break;
     case BIG_SPEED:                                 //-- BIG SPEED
-      printBig(S23CB0.speed / 10, dispBp[4]);
+      printBig(S23CB0.speed / 10 * wheelmult, dispBp[4]);
       break;
 
     case CELLS:
